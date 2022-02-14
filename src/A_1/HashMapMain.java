@@ -3,6 +3,8 @@ package A_1;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class HashMapMain {
     public static void main(String[] args) {
@@ -14,6 +16,7 @@ public class HashMapMain {
         String[] words = input.trim().split(" ");
         List<Character> letters = new ArrayList<>();
         if (words.length == 1) {
+            long before = System.currentTimeMillis();
 //          save String to List<Character>
             saveToList(letters, words[0]);
             System.out.println("length : "+getLength(letters));
@@ -22,6 +25,10 @@ public class HashMapMain {
 
 //            print Map
             printHashMap(map);
+            long after = System.currentTimeMillis();
+            System.out.println();
+            System.out.println("duration ");
+            System.out.println(after-before);
         } else if (words.length == 2) {
 
             for (int i = 0; i < 2; i++) {
@@ -54,14 +61,27 @@ public class HashMapMain {
         return word.toString();
     }
 
+//    // fill value in the set
+//    private static Set<String> fillInTheSet(List<Character> letters, String word) {
+//        Set<String> set = new HashSet<>();
+//        set.add(word);
+//        while (set.size() < getLength(letters)) {
+//
+//            Collections.shuffle(letters);
+//            set.add(convertCharacterListToString(letters));
+//        }
+//        return set;
+//    }
+
     // fill value in the set
     private static Set<String> fillInTheSet(List<Character> letters, String word) {
         Set<String> set = new HashSet<>();
         set.add(word);
-        while (set.size() < getLength(letters)) {
-            Collections.shuffle(letters);
-            set.add(convertCharacterListToString(letters));
-        }
+        ExecutorService executorService = Executors.newFixedThreadPool(5);
+        while (set.size() < getLength(letters))
+            for (int i = 0; i < 5; i++)
+                executorService.execute(new ThreadPool(set,letters));
+        executorService.shutdown();
         return set;
     }
 //    get length of possible word
@@ -86,6 +106,9 @@ public class HashMapMain {
     }
     // print hash map
     private static void printHashMap(Map<String, Set<String>> map) {
-        System.out.println(map);
+//        System.out.println(map);
+        for (var m : map.keySet()) {
+            System.out.print("key: " + m+" value : "+map.get(m));
+        }
     }
 }
