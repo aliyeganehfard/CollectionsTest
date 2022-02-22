@@ -3,8 +3,10 @@ package A_1;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class HashMapMain {
     public static void main(String[] args) {
@@ -22,7 +24,6 @@ public class HashMapMain {
             System.out.println("length : "+getLength(letters));
 //          fill Set<String> and save to map
             map.put(words[0], fillInTheSet(letters, words[0]));
-
 //            print Map
             printHashMap(map);
             long after = System.currentTimeMillis();
@@ -66,25 +67,36 @@ public class HashMapMain {
 //        Set<String> set = new HashSet<>();
 //        set.add(word);
 //        while (set.size() < getLength(letters)) {
-//
 //            Collections.shuffle(letters);
 //            set.add(convertCharacterListToString(letters));
 //        }
 //        return set;
 //    }
 
-    // fill value in the set
+    // fill value in the set -- thread
     private static Set<String> fillInTheSet(List<Character> letters, String word) {
         Set<String> set = new HashSet<>();
         set.add(word);
-        ExecutorService executorService = Executors.newFixedThreadPool(5);
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
         while (set.size() < getLength(letters))
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 1; i++)
                 executorService.execute(new ThreadPool(set,letters));
         executorService.shutdown();
+        try {
+            executorService.awaitTermination(1,TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return set;
     }
+
+
 //    get length of possible word
+
+//      word : 4 * 3 * 2 * 1 / 1 = 24
+//      wood : 4 * 3 * 2 * 1 / 2 * 1 = 12
+//      wooo : 4 * 3 * 2 * 1 / 3 * 2 * 1 = 4
+//      wwww : 4 * 3 * 2 * 1 / 4 * 3 * 2 * 1 = 1
 
     private static int getLength(List<Character> letters){
         int length = 1;
@@ -104,6 +116,7 @@ public class HashMapMain {
         int count = length/divide;
         return count;
     }
+
     // print hash map
     private static void printHashMap(Map<String, Set<String>> map) {
 //        System.out.println(map);
